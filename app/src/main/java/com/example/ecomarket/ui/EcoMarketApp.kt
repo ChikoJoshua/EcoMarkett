@@ -1,6 +1,7 @@
 package com.example.ecomarket.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -8,9 +9,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.ecomarket.data.datastore.UserPreferencesRepository
 import com.example.ecomarket.ui.screens.*
-import com.example.ecomarket.ui.viewmodel.LoginViewModel
+import com.example.ecomarket.ui.viewmodel.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 @Composable
 fun EcoMarketApp(isLoggedIn: Boolean) {
@@ -44,39 +46,48 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
             )
         }
 
-        // 🏠 MAIN (Bottom Navigation)
+        // 🏠 MAIN
         composable(Screen.Main.route) {
-            MainScreen(navController = navController)
+            val productsViewModel: ProductsViewModel = viewModel(factory = ProductsViewModelFactory())
+            MainScreen(
+                viewModel = productsViewModel,
+                navController = navController
+            )
         }
 
         // 🛒 CARRITO
         composable(Screen.Cart.route) {
-            CartScreen(mainNavController = navController)
+            val checkoutViewModel: CheckoutViewModel = viewModel(factory = CheckoutViewModelFactory())
+            CartScreen(
+                viewModel = checkoutViewModel,
+                mainNavController = navController
+            )
         }
 
         // 💳 CHECKOUT
         composable(Screen.Checkout.route) {
-            CheckoutScreen(mainNavController = navController)
+            val checkoutViewModel: CheckoutViewModel = viewModel(factory = CheckoutViewModelFactory())
+            CheckoutScreen(
+                viewModel = checkoutViewModel,
+                mainNavController = navController
+            )
         }
 
-        // 🚚 SHIPPING (NUEVA PANTALLA)
+        // 🚚 SHIPPING
         composable(Screen.Shipping.route) {
-            ShippingScreen(mainNavController = navController)
+            ShippingScreen(
+                mainNavController = navController
+                // Si ShippingScreen necesita un ViewModel, lo pasas aquí
+            )
         }
-    }
-}
 
-/* ---------- LOGIN VIEWMODEL FACTORY ---------- */
-
-class LoginViewModelFactory(
-    private val repository: UserPreferencesRepository
-) : ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return LoginViewModel(repository) as T
+        // 📜 HISTORY (si tienes pantalla de historial)
+        composable(Screen.History.route) {
+            val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModelFactory())
+            HistoryScreen(
+                viewModel = historyViewModel,
+                navController = navController
+            )
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
