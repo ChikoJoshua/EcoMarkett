@@ -6,29 +6,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.ecomarket.data.models.CartItem
-import com.example.ecomarket.domain.repository.ProductRepository
 import com.example.ecomarket.ui.Screen
 import com.example.ecomarket.ui.viewmodel.ProductsViewModel
-import com.example.ecomarket.ui.viewmodel.ProductsViewModelFactory
 import java.util.Locale
-import androidx.compose.material.icons.filled.ShoppingCart
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartScreen(mainNavController: NavHostController) {
+fun CartScreen(
+    mainNavController: NavHostController,
+    viewModel: ProductsViewModel
+) {
 
-    val viewModel: ProductsViewModel =
-        viewModel(factory = ProductsViewModelFactory(ProductRepository()))
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -39,8 +36,7 @@ fun CartScreen(mainNavController: NavHostController) {
                     if (uiState.cartItems.isNotEmpty()) {
                         IconButton(onClick = viewModel::clearCart) {
                             Icon(
-                                Icons.Filled.ShoppingCart
-                                ,
+                                Icons.Filled.ShoppingCart,
                                 contentDescription = "Vaciar Carrito"
                             )
                         }
@@ -60,8 +56,13 @@ fun CartScreen(mainNavController: NavHostController) {
     ) { paddingValues ->
 
         if (uiState.cartItems.isEmpty()) {
-            EmptyCartMessage(Modifier.padding(paddingValues))
+
+            EmptyCartMessage(
+                modifier = Modifier.padding(paddingValues)
+            )
+
         } else {
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -81,8 +82,13 @@ fun CartScreen(mainNavController: NavHostController) {
     }
 }
 
+// ---------- Cart Item Row ----------
+
 @Composable
-fun CartItemRow(item: CartItem, onUpdateQuantity: (CartItem, Int) -> Unit) {
+fun CartItemRow(
+    item: CartItem,
+    onUpdateQuantity: (CartItem, Int) -> Unit
+) {
 
     val priceText = String.format(Locale.US, "$%.2f", item.product.price)
     val totalItemPrice = String.format(
@@ -132,7 +138,6 @@ fun CartItemRow(item: CartItem, onUpdateQuantity: (CartItem, Int) -> Unit) {
                     }
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = "Quitar")
-
                 }
 
                 Text(
@@ -152,8 +157,14 @@ fun CartItemRow(item: CartItem, onUpdateQuantity: (CartItem, Int) -> Unit) {
     }
 }
 
+// ---------- Bottom Bar ----------
+
 @Composable
-fun CartBottomBar(total: Double, onContinueClick: () -> Unit, isEnabled: Boolean) {
+fun CartBottomBar(
+    total: Double,
+    onContinueClick: () -> Unit,
+    isEnabled: Boolean
+) {
 
     val totalText = String.format(Locale.US, "$%.2f", total)
 
@@ -190,6 +201,8 @@ fun CartBottomBar(total: Double, onContinueClick: () -> Unit, isEnabled: Boolean
     }
 }
 
+// ---------- Empty Cart ----------
+
 @Composable
 fun EmptyCartMessage(modifier: Modifier) {
     Column(
@@ -199,8 +212,7 @@ fun EmptyCartMessage(modifier: Modifier) {
     ) {
 
         Icon(
-            Icons.Filled.ShoppingCart
-            ,
+            Icons.Filled.ShoppingCart,
             contentDescription = "Carrito Vacío",
             modifier = Modifier.size(80.dp)
         )

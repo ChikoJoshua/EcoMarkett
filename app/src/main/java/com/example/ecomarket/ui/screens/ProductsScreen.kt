@@ -13,22 +13,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.ecomarket.data.models.Product
-import com.example.ecomarket.domain.repository.ProductRepository
 import com.example.ecomarket.ui.Screen
 import com.example.ecomarket.ui.viewmodel.ProductsViewModel
-import com.example.ecomarket.ui.viewmodel.ProductsViewModelFactory
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductsScreen(mainNavController: NavHostController) {
-
-    val viewModel: ProductsViewModel = viewModel(
-        factory = ProductsViewModelFactory(ProductRepository())
-    )
+fun ProductsScreen(
+    mainNavController: NavHostController,
+    viewModel: ProductsViewModel
+) {
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -47,10 +43,15 @@ fun ProductsScreen(mainNavController: NavHostController) {
                         },
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        IconButton(onClick = {
-                            mainNavController.navigate(Screen.Cart.route)
-                        }) {
-                            Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito")
+                        IconButton(
+                            onClick = {
+                                mainNavController.navigate(Screen.Cart.route)
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.ShoppingCart,
+                                contentDescription = "Carrito"
+                            )
                         }
                     }
                 }
@@ -59,8 +60,9 @@ fun ProductsScreen(mainNavController: NavHostController) {
     ) { paddingValues ->
 
         if (uiState.isLoading) {
+
             Box(
-                Modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
@@ -90,8 +92,13 @@ fun ProductsScreen(mainNavController: NavHostController) {
     }
 }
 
+// ---------- Product Card ----------
+
 @Composable
-fun ProductCard(product: Product, onAddToCart: () -> Unit) {
+fun ProductCard(
+    product: Product,
+    onAddToCart: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,8 +138,10 @@ fun ProductCard(product: Product, onAddToCart: () -> Unit) {
                 onClick = onAddToCart,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(Icons.Filled.ShoppingCart
-                    , contentDescription = "Agregar")
+                Icon(
+                    Icons.Filled.ShoppingCart,
+                    contentDescription = "Agregar"
+                )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Agregar")
             }

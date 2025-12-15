@@ -1,10 +1,10 @@
 package com.example.ecomarket.ui
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecomarket.ui.screens.*
 import com.example.ecomarket.ui.viewmodel.LoginViewModel
 
@@ -15,7 +15,6 @@ fun AppNavigation(navController: NavHostController) {
         navController = navController,
         startDestination = Screen.Login.route
     ) {
-
 
         composable(Screen.Login.route) {
             val loginViewModel: LoginViewModel = viewModel()
@@ -30,18 +29,8 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-
         composable(Screen.Main.route) {
             MainScreen(navController)
-        }
-
-
-        composable(Screen.Cart.route) {
-            CartScreen(navController)
-        }
-
-        composable(Screen.Checkout.route) {
-            CheckoutScreen(navController)
         }
     }
 }
