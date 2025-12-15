@@ -15,4 +15,3 @@ class PurchaseRepository {
         println("Compra registrada para $userEmail, total: $total, método: $method, dirección: $address")
     }
 }
-}

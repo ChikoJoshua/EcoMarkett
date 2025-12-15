@@ -1,22 +1,25 @@
+// Archivo: com/example/ecomarket/data/repository/ShippingRepository.kt
+
 package com.example.ecomarket.data.repository
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import android.content.Context
+import com.example.ecomarket.domain.repository.ShippingRepository
+import com.example.ecomarket.domain.model.ShippingData
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
-data class ShippingData(
-    val fullName: String = "",
-    val address: String = "",
-    val city: String = "",
-    val phone: String = ""
-)
+class ShippingRepository(
+    private val context: Context
+) : ShippingRepository {
 
-class ShippingRepository {
 
-    private val _shippingData = MutableStateFlow(ShippingData())
-    val shippingData: StateFlow<ShippingData> = _shippingData
+    override fun getShippingData(): Flow<ShippingData> {
 
-    fun saveShippingData(fullName: String, address: String, city: String, phone: String) {
-        _shippingData.value = ShippingData(fullName, address, city, phone)
-        println("Datos de envío guardados: $fullName, $address, $city, $phone")
+        return flowOf(ShippingData())
     }
+
+    override suspend fun saveShippingData(data: ShippingData) {
+
+    }
+
 }

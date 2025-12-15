@@ -23,7 +23,7 @@ import java.util.Locale
 @Composable
 fun ProductsScreen(
     mainNavController: NavHostController,
-    viewModel: ProductsViewModel
+    viewModel: ProductsViewModel // <-- Firma que MainScreen debe igualar
 ) {
 
     val uiState by viewModel.uiState.collectAsState()

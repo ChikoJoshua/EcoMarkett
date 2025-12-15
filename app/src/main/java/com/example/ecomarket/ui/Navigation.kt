@@ -7,9 +7,15 @@ import androidx.navigation.compose.composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecomarket.ui.screens.*
 import com.example.ecomarket.ui.viewmodel.LoginViewModel
+import com.example.ecomarket.ui.viewmodel.ProductsViewModel // <-- NECESITAS EL IMPORT
+import com.example.ecomarket.ui.viewmodel.ProductsViewModelFactory // <-- NECESITAS EL IMPORT
 
+// CORRECCIÓN 1: AppNavigation debe recibir productsViewModel
 @Composable
-fun AppNavigation(navController: NavHostController) {
+fun AppNavigation(
+    navController: NavHostController,
+    productsViewModel: ProductsViewModel // <-- Añadido el parámetro faltante
+) {
 
     NavHost(
         navController = navController,
@@ -29,8 +35,13 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
+        // CORRECCIÓN 2: Pasar productsViewModel a MainScreen
         composable(Screen.Main.route) {
-            MainScreen(navController)
+            // L33: Ahora pasamos el argumento que faltaba
+            MainScreen(
+                mainNavController = navController,
+                productsViewModel = productsViewModel // <-- Añadido el argumento
+            )
         }
     }
 }

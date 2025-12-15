@@ -17,12 +17,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState // Import necesario
 import com.example.ecomarket.R
 import com.example.ecomarket.ui.Screen
 import com.example.ecomarket.ui.viewmodel.ProductsViewModel
 
 /* ---------- Bottom items ---------- */
-
 sealed class BottomScreen(
     val route: String,
     val label: String,
@@ -45,15 +45,12 @@ private val bottomItems = listOf(
 )
 
 /* ---------- MainScreen ---------- */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     mainNavController: NavHostController,
     productsViewModel: ProductsViewModel
 ) {
-
-    // NavController SOLO para BottomNav
     val bottomNavController = rememberNavController()
 
     Scaffold(
@@ -107,7 +104,6 @@ fun MainScreen(
 }
 
 /* ---------- BottomNavGraph ---------- */
-
 @Composable
 fun BottomNavGraph(
     navController: NavHostController,
@@ -122,14 +118,15 @@ fun BottomNavGraph(
     ) {
 
         composable(BottomScreen.Products.route) {
+            // CORRECCIÓN: Se usa 'viewModel' en lugar de 'productsViewModel'
             ProductsScreen(
                 mainNavController = mainNavController,
-                productsViewModel = productsViewModel
+                viewModel = productsViewModel
             )
         }
 
         composable(BottomScreen.History.route) {
-            HistoryScreen() // Asumiendo que no requiere argumentos
+            HistoryScreen()
         }
 
         composable(BottomScreen.Account.route) {
