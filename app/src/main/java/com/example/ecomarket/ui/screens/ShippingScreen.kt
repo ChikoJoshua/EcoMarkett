@@ -3,20 +3,44 @@ package com.example.ecomarket.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.example.ecomarket.domain.repository.ShippingRepository
+import com.example.ecomarket.ui.Screen
 import com.example.ecomarket.ui.viewmodel.ShippingViewModel
+import com.example.ecomarket.ui.viewmodel.ShippingViewModelFactory
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShippingScreen(
-    viewModel: ShippingViewModel,
-    onConfirm: () -> Unit
+    mainNavController: NavHostController
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Inicializamos el ViewModel con su factory
+    val shippingViewModel: ShippingViewModel = viewModel(
+        factory = ShippingViewModelFactory(ShippingRepository(context))
+    )
+
+    val uiState by shippingViewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Datos de Envío") })
+            TopAppBar(
+                title = { Text("Datos de Envío") },
+                navigationIcon = {
+                    IconButton(onClick = { mainNavController.popBackStack() }) {
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
         }
     ) { padding ->
 
@@ -25,33 +49,34 @@ fun ShippingScreen(
                 .padding(padding)
                 .padding(16.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.Start
         ) {
 
             OutlinedTextField(
                 value = uiState.fullName,
-                onValueChange = viewModel::updateFullName,
+                onValueChange = shippingViewModel::updateFullName,
                 label = { Text("Nombre completo") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = uiState.address,
-                onValueChange = viewModel::updateAddress,
+                onValueChange = shippingViewModel::updateAddress,
                 label = { Text("Dirección") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = uiState.city,
-                onValueChange = viewModel::updateCity,
+                onValueChange = shippingViewModel::updateCity,
                 label = { Text("Ciudad") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = uiState.phone,
-                onValueChange = viewModel::updatePhone,
+                onValueChange = shippingViewModel::updatePhone,
                 label = { Text("Teléfono") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -61,7 +86,7 @@ fun ShippingScreen(
             ) {
                 Checkbox(
                     checked = uiState.saveData,
-                    onCheckedChange = viewModel::toggleSaveData
+                    onCheckedChange = shippingViewModel::toggleSaveData
                 )
                 Text("Guardar datos para futuras compras")
             }
@@ -69,7 +94,11 @@ fun ShippingScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { viewModel.confirmShipping(onConfirm) },
+                onClick = {
+                    shippingViewModel.confirmShipping {
+                        mainNavController.navigate(Screen.Checkout.route)
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Confirmar Envío")

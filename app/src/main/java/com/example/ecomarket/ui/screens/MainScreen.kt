@@ -14,9 +14,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.ecomarket.R
 import com.example.ecomarket.ui.Screen
+import com.example.ecomarket.ui.viewmodel.ProductsViewModel
 
 /* ---------- Bottom items ---------- */
 
@@ -45,7 +48,10 @@ private val bottomItems = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(mainNavController: NavHostController) {
+fun MainScreen(
+    mainNavController: NavHostController,
+    productsViewModel: ProductsViewModel
+) {
 
     // NavController SOLO para BottomNav
     val bottomNavController = rememberNavController()
@@ -94,7 +100,8 @@ fun MainScreen(mainNavController: NavHostController) {
         BottomNavGraph(
             navController = bottomNavController,
             modifier = Modifier.padding(paddingValues),
-            mainNavController = mainNavController
+            mainNavController = mainNavController,
+            productsViewModel = productsViewModel
         )
     }
 }
@@ -105,7 +112,8 @@ fun MainScreen(mainNavController: NavHostController) {
 fun BottomNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    mainNavController: NavHostController
+    mainNavController: NavHostController,
+    productsViewModel: ProductsViewModel
 ) {
     NavHost(
         navController = navController,
@@ -114,15 +122,20 @@ fun BottomNavGraph(
     ) {
 
         composable(BottomScreen.Products.route) {
-            ProductsScreen(mainNavController = mainNavController)
+            ProductsScreen(
+                mainNavController = mainNavController,
+                productsViewModel = productsViewModel
+            )
         }
 
         composable(BottomScreen.History.route) {
-            HistoryScreen()
+            HistoryScreen() // Asumiendo que no requiere argumentos
         }
 
         composable(BottomScreen.Account.route) {
-            AccountScreen(mainNavController = mainNavController)
+            AccountScreen(
+                mainNavController = mainNavController
+            )
         }
     }
 }

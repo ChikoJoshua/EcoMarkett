@@ -14,24 +14,28 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.ecomarket.R
-import com.example.ecomarket.domain.repository.ProductRepository
 import com.example.ecomarket.ui.Screen
-import com.example.ecomarket.ui.viewmodel.*
-import java.util.Locale
+import com.example.ecomarket.ui.viewmodel.CheckoutViewModel
+import com.example.ecomarket.ui.viewmodel.ProductsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CheckoutScreen(mainNavController: NavHostController) {
-
-    val productsViewModel: ProductsViewModel =
-        viewModel(factory = ProductsViewModelFactory(ProductRepository()))
-
-    val context = LocalContext.current
-    val checkoutViewModel: CheckoutViewModel = viewModel(
-        factory = CheckoutViewModelFactory(context, productsViewModel)
-    )
+fun CheckoutScreen(
+    productsViewModel: ProductsViewModel,
+    checkoutViewModel: CheckoutViewModel,
+    mainNavController: NavHostController
+) {
 
     val uiState by checkoutViewModel.uiState.collectAsState()
+
+    // Computed properties para reemplazar canContinue y needsShippingData
+    val canContinue = uiState.isRetiroSelected || (uiState.isDespachoSelected &&
+            uiState.address.isNotBlank() && uiState.name.isNotBlank() &&
+            uiState.comuna.isNotBlank() && uiState.number.isNotBlank())
+
+    val needsShippingData = uiState.isDespachoSelected &&
+            (uiState.address.isBlank() || uiState.name.isBlank() ||
+                    uiState.comuna.isBlank() || uiState.number.isBlank())
 
     // ✅ COMPRA FINALIZADA
     if (uiState.isPurchaseComplete) {
@@ -44,12 +48,10 @@ fun CheckoutScreen(mainNavController: NavHostController) {
         bottomBar = {
             CheckoutBottomBar(
                 total = productsViewModel.getCartTotal(),
-                isEnabled = uiState.canContinue,
+                isEnabled = canContinue,
                 isProcessing = uiState.isProcessing,
                 onConfirm = {
-
-                    // 🚚 DESPACHO Y FALTAN DATOS → SHIPPING
-                    if (uiState.isDespachoSelected && uiState.needsShippingData) {
+                    if (uiState.isDespachoSelected && needsShippingData) {
                         mainNavController.navigate(Screen.Shipping.route)
                     } else {
                         checkoutViewModel.finalizePurchase()
@@ -107,7 +109,7 @@ fun DeliveryMethodSelector(viewModel: CheckoutViewModel) {
         MethodButton(
             label = "Retiro en tienda 🏬",
             isSelected = uiState.isRetiroSelected
-        ) { viewModel.setMethod("Retiro") }
+        ) { viewModel.setMethod("Retiro en tienda") }
 
         MethodButton(
             label = "Despacho 🚚",
@@ -156,7 +158,7 @@ fun CheckoutBottomBar(
     isProcessing: Boolean,
     onConfirm: () -> Unit
 ) {
-    val totalText = String.format(Locale.US, "$%.2f", total)
+    val totalText = "$%.2f".format(total)
 
     Column(Modifier.padding(16.dp)) {
 

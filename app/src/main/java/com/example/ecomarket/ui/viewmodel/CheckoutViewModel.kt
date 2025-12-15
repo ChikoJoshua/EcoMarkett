@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// Estado de la UI para Checkout
 data class CheckoutUiState(
-    val selectedMethod: String? = null, // "Retiro" o "Despacho"
+    val selectedMethod: String? = null, // "Retiro en tienda" o "Despacho"
     val isRetiroSelected: Boolean = false,
     val isDespachoSelected: Boolean = false,
     val address: String = "",
@@ -33,6 +34,7 @@ class CheckoutViewModel(
     private val _uiState = MutableStateFlow(CheckoutUiState())
     val uiState: StateFlow<CheckoutUiState> = _uiState.asStateFlow()
 
+    // Seleccionar método de envío
     fun setMethod(method: String) {
         val isRetiro = method == "Retiro en tienda"
         _uiState.update {
@@ -46,13 +48,13 @@ class CheckoutViewModel(
         }
     }
 
+    // Actualizar campos del formulario
     fun updateAddressField(newAddress: String) { _uiState.update { it.copy(address = newAddress) } }
     fun updateNameField(newName: String) { _uiState.update { it.copy(name = newName) } }
     fun updateComunaField(newComuna: String) { _uiState.update { it.copy(comuna = newComuna) } }
     fun updateNumberField(newNumber: String) { _uiState.update { it.copy(number = newNumber) } }
 
-
-
+    // Validar formulario de despacho
     private fun isDespachoFormValid(): Boolean {
         return _uiState.value.address.isNotBlank() &&
                 _uiState.value.name.isNotBlank() &&
@@ -60,10 +62,10 @@ class CheckoutViewModel(
                 _uiState.value.number.isNotBlank()
     }
 
-
+    // Finalizar compra
     fun finalizePurchase() {
+        // Si despacho seleccionado pero formulario inválido, no continuar
         if (_uiState.value.isDespachoSelected && !isDespachoFormValid()) {
-
             return
         }
 
@@ -75,13 +77,14 @@ class CheckoutViewModel(
             val userEmail = userPrefsRepository.userEmail.first() ?: "unknown"
             val method = _uiState.value.selectedMethod ?: "N/A"
 
+            val canContinue = _uiState.value.isRetiroSelected || (_uiState.value.isDespachoSelected && isDespachoFormValid())
+            val needsShippingData = _uiState.value.isDespachoSelected && !isDespachoFormValid()
 
             val finalAddress = if (_uiState.value.isDespachoSelected) {
                 "Dirección: ${_uiState.value.address}, Comuna: ${_uiState.value.comuna}, Nombre: ${_uiState.value.name}, Número: ${_uiState.value.number}"
             } else {
                 "Retiro en Sucursal Central"
             }
-
 
             purchaseRepository.registerPurchase(
                 userEmail = userEmail,
@@ -90,7 +93,6 @@ class CheckoutViewModel(
                 method = method,
                 address = finalAddress
             )
-
 
             productsViewModel.clearCart()
 
