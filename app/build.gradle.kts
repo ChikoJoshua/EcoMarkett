@@ -1,4 +1,4 @@
-plugins {
+    plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -79,3 +79,5 @@ dependencies {
     // 5. Gson (Serialización y Deserialización JSON)
     implementation(libs.google.code.gson)
 }
+
+    // hippie gay
