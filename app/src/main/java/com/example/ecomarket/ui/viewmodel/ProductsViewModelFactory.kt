@@ -2,16 +2,13 @@ package com.example.ecomarket.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.ecomarket.domain.repository.ProductRepository
 
-class ProductsViewModelFactory(
-    private val repository: ProductRepository
-) : ViewModelProvider.Factory {
+class ProductsViewModelFactory : ViewModelProvider.Factory {
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ProductsViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return ProductsViewModel(repository) as T
+            return ProductsViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

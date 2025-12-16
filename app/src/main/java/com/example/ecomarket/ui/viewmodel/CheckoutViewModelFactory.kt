@@ -17,6 +17,7 @@ class CheckoutViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CheckoutViewModel::class.java)) {
             return CheckoutViewModel(
+                context,
                 productsViewModel,
                 purchaseRepository,
                 userPrefsRepository

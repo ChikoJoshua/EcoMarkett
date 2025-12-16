@@ -2,7 +2,7 @@ package com.example.ecomarket.data.repository
 
 import com.example.ecomarket.data.models.CartItem
 
-class PurchaseRepository {
+class PurchaseRepositoryImpl {
 
     fun registerPurchase(
         userEmail: String,

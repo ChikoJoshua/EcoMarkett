@@ -1,240 +1,88 @@
 package com.example.ecomarket.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.ecomarket.R
-import com.example.ecomarket.ui.Screen
 import com.example.ecomarket.ui.viewmodel.CheckoutViewModel
-import com.example.ecomarket.ui.viewmodel.ProductsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
-    productsViewModel: ProductsViewModel,
-    checkoutViewModel: CheckoutViewModel,
-    mainNavController: NavHostController
+    mainNavController: NavHostController,
+    viewModel: CheckoutViewModel
 ) {
+    val isProcessing = viewModel.isProcessing
+    val isPurchaseComplete = viewModel.isPurchaseComplete
 
-    val uiState by checkoutViewModel.uiState.collectAsState()
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text("Finalizar Compra", style = MaterialTheme.typography.headlineSmall)
 
-    // Computed properties para reemplazar canContinue y needsShippingData
-    val canContinue = uiState.isRetiroSelected || (uiState.isDespachoSelected &&
-            uiState.address.isNotBlank() && uiState.name.isNotBlank() &&
-            uiState.comuna.isNotBlank() && uiState.number.isNotBlank())
+        Spacer(modifier = Modifier.height(16.dp))
 
-    val needsShippingData = uiState.isDespachoSelected &&
-            (uiState.address.isBlank() || uiState.name.isBlank() ||
-                    uiState.comuna.isBlank() || uiState.number.isBlank())
-
-    // ✅ COMPRA FINALIZADA
-    if (uiState.isPurchaseComplete) {
-        PurchaseCompleteScreen(mainNavController)
-        return
-    }
-
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Finalizar Compra") }) },
-        bottomBar = {
-            CheckoutBottomBar(
-                total = productsViewModel.getCartTotal(),
-                isEnabled = canContinue,
-                isProcessing = uiState.isProcessing,
-                onConfirm = {
-                    if (uiState.isDespachoSelected && needsShippingData) {
-                        mainNavController.navigate(Screen.Shipping.route)
-                    } else {
-                        checkoutViewModel.finalizePurchase()
-                    }
-                }
+        // Método de envío
+        Row {
+            RadioButton(
+                selected = viewModel.isRetiroSelected,
+                onClick = { viewModel.setMethod(true) }
             )
-        }
-    ) { padding ->
+            Text("Retiro en tienda", modifier = Modifier.padding(start = 8.dp))
 
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+            Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                "1. Método de Entrega",
-                style = MaterialTheme.typography.headlineSmall
+            RadioButton(
+                selected = viewModel.isDespachoSelected,
+                onClick = { viewModel.setMethod(false) }
             )
-
-            Spacer(Modifier.height(12.dp))
-
-            DeliveryMethodSelector(viewModel = checkoutViewModel)
-
-            Spacer(Modifier.height(24.dp))
-
-            if (uiState.isRetiroSelected) {
-                RetiroInfo()
-            }
-
-            if (uiState.isDespachoSelected) {
-                Text(
-                    "Los datos de despacho se solicitarán al continuar",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            Text("Despacho a domicilio", modifier = Modifier.padding(start = 8.dp))
         }
-    }
-}
 
-/* ---------- COMPONENTES ---------- */
+        Spacer(modifier = Modifier.height(16.dp))
 
-@Composable
-fun DeliveryMethodSelector(viewModel: CheckoutViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        MethodButton(
-            label = "Retiro en tienda 🏬",
-            isSelected = uiState.isRetiroSelected
-        ) { viewModel.setMethod("Retiro en tienda") }
-
-        MethodButton(
-            label = "Despacho 🚚",
-            isSelected = uiState.isDespachoSelected
-        ) { viewModel.setMethod("Despacho") }
-    }
-}
-
-@Composable
-fun MethodButton(label: String, isSelected: Boolean, onClick: () -> Unit) {
-    OutlinedButton(
-        onClick = onClick,
-        border = ButtonDefaults.outlinedButtonBorder.copy(
-            width = if (isSelected) 2.dp else 1.dp
-        ),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = if (isSelected)
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            else MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Text(label)
-    }
-}
-
-@Composable
-fun RetiroInfo() {
-    Column {
-        Text("2. Retiro en tienda", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(8.dp))
-        Text("Sucursal Central: Calle Emaus 123")
-        Text("Sucursal Norte: Av. Siempre Viva 742")
-        Text(
-            "Se asignará la sucursal central",
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-}
-
-/* ---------- BOTTOM BAR ---------- */
-
-@Composable
-fun CheckoutBottomBar(
-    total: Double,
-    isEnabled: Boolean,
-    isProcessing: Boolean,
-    onConfirm: () -> Unit
-) {
-    val totalText = "$%.2f".format(total)
-
-    Column(Modifier.padding(16.dp)) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Total:")
-            Text(
-                totalText,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary
+        if (viewModel.isDespachoSelected) {
+            OutlinedTextField(
+                value = viewModel.address,
+                onValueChange = { viewModel.address = it },
+                label = { Text("Dirección") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = viewModel.name,
+                onValueChange = { viewModel.name = it },
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = viewModel.comuna,
+                onValueChange = { viewModel.comuna = it },
+                label = { Text("Comuna") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = viewModel.number,
+                onValueChange = { viewModel.number = it },
+                label = { Text("Número") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = onConfirm,
-            enabled = isEnabled && !isProcessing,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+            onClick = { viewModel.finalizePurchase() },
+            enabled = !isProcessing,
+            modifier = Modifier.fillMaxWidth().height(50.dp)
         ) {
-            if (isProcessing) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Continuar")
-            }
+            Text(if (isProcessing) "Procesando..." else "Finalizar Compra")
         }
-    }
-}
 
-/* ---------- COMPRA FINALIZADA ---------- */
-
-@Composable
-fun PurchaseCompleteScreen(mainNavController: NavHostController) {
-
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(32.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = null,
-                modifier = Modifier.size(100.dp)
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            Text(
-                "¡Gracias por tu compra!",
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    mainNavController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.Main.route) { inclusive = true }
-                    }
-                }
-            ) {
-                Text("Volver al inicio")
-            }
+        if (isPurchaseComplete) {
+            Text("Compra realizada con éxito!", color = MaterialTheme.colorScheme.primary)
         }
     }
 }

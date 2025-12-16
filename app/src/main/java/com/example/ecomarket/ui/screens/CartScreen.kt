@@ -16,29 +16,26 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.ecomarket.data.models.CartItem
 import com.example.ecomarket.ui.Screen
-import com.example.ecomarket.ui.viewmodel.ProductsViewModel
+import com.example.ecomarket.ui.viewmodel.CheckoutViewModel
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     mainNavController: NavHostController,
-    viewModel: ProductsViewModel
+    viewModel: CheckoutViewModel
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
+    val cartItems = uiState.cartItems
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Mi Carrito de Compras") },
                 actions = {
-                    if (uiState.cartItems.isNotEmpty()) {
-                        IconButton(onClick = viewModel::clearCart) {
-                            Icon(
-                                Icons.Filled.ShoppingCart,
-                                contentDescription = "Vaciar Carrito"
-                            )
+                    if (cartItems.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.clearCart() }) {
+                            Icon(Icons.Filled.ShoppingCart, contentDescription = "Vaciar Carrito")
                         }
                     }
                 }
@@ -47,22 +44,14 @@ fun CartScreen(
         bottomBar = {
             CartBottomBar(
                 total = viewModel.getCartTotal(),
-                onContinueClick = {
-                    mainNavController.navigate(Screen.Checkout.route)
-                },
-                isEnabled = uiState.cartItems.isNotEmpty()
+                onContinueClick = { mainNavController.navigate(Screen.Checkout.route) },
+                isEnabled = cartItems.isNotEmpty()
             )
         }
     ) { paddingValues ->
-
-        if (uiState.cartItems.isEmpty()) {
-
-            EmptyCartMessage(
-                modifier = Modifier.padding(paddingValues)
-            )
-
+        if (cartItems.isEmpty()) {
+            EmptyCartMessage(modifier = Modifier.padding(paddingValues))
         } else {
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -70,10 +59,12 @@ fun CartScreen(
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(uiState.cartItems) { item ->
+                items(cartItems) { item ->
                     CartItemRow(
                         item = item,
-                        onUpdateQuantity = viewModel::updateCartItemQuantity
+                        onUpdateQuantity = { cartItem, quantity ->
+                            viewModel.updateCartItemQuantity(cartItem, quantity)
+                        }
                     )
                     Divider()
                 }
@@ -83,19 +74,13 @@ fun CartScreen(
 }
 
 // ---------- Cart Item Row ----------
-
 @Composable
 fun CartItemRow(
     item: CartItem,
     onUpdateQuantity: (CartItem, Int) -> Unit
 ) {
-
     val priceText = String.format(Locale.US, "$%.2f", item.product.price)
-    val totalItemPrice = String.format(
-        Locale.US,
-        "$%.2f",
-        item.product.price * item.quantity
-    )
+    val totalItemPrice = String.format(Locale.US, "$%.2f", item.product.price * item.quantity)
 
     Row(
         modifier = Modifier
@@ -103,7 +88,6 @@ fun CartItemRow(
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Image(
             painter = painterResource(id = item.product.imageResId),
             contentDescription = item.product.name,
@@ -118,7 +102,6 @@ fun CartItemRow(
         }
 
         Column(horizontalAlignment = Alignment.End) {
-
             Text(
                 totalItemPrice,
                 style = MaterialTheme.typography.titleMedium.copy(
@@ -129,27 +112,13 @@ fun CartItemRow(
             Spacer(modifier = Modifier.height(4.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-
-                IconButton(
-                    onClick = {
-                        if (item.quantity > 1) {
-                            onUpdateQuantity(item, item.quantity - 1)
-                        }
-                    }
-                ) {
+                IconButton(onClick = { if (item.quantity > 1) onUpdateQuantity(item, item.quantity - 1) }) {
                     Icon(Icons.Filled.Add, contentDescription = "Quitar")
                 }
 
-                Text(
-                    item.quantity.toString(),
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
+                Text(item.quantity.toString(), modifier = Modifier.padding(horizontal = 8.dp))
 
-                IconButton(
-                    onClick = {
-                        onUpdateQuantity(item, item.quantity + 1)
-                    }
-                ) {
+                IconButton(onClick = { onUpdateQuantity(item, item.quantity + 1) }) {
                     Icon(Icons.Filled.Add, contentDescription = "Sumar")
                 }
             }
@@ -158,26 +127,17 @@ fun CartItemRow(
 }
 
 // ---------- Bottom Bar ----------
-
 @Composable
 fun CartBottomBar(
     total: Double,
     onContinueClick: () -> Unit,
     isEnabled: Boolean
 ) {
-
     val totalText = String.format(Locale.US, "$%.2f", total)
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text("Total de la compra:")
@@ -192,9 +152,7 @@ fun CartBottomBar(
         Button(
             onClick = onContinueClick,
             enabled = isEnabled,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+            modifier = Modifier.fillMaxWidth().height(50.dp)
         ) {
             Text("Continuar con la compra")
         }
@@ -202,7 +160,6 @@ fun CartBottomBar(
 }
 
 // ---------- Empty Cart ----------
-
 @Composable
 fun EmptyCartMessage(modifier: Modifier) {
     Column(
@@ -210,12 +167,7 @@ fun EmptyCartMessage(modifier: Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
-        Icon(
-            Icons.Filled.ShoppingCart,
-            contentDescription = "Carrito Vacío",
-            modifier = Modifier.size(80.dp)
-        )
+        Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito Vacío", modifier = Modifier.size(80.dp))
 
         Text(
             "Tu carrito está vacío.",

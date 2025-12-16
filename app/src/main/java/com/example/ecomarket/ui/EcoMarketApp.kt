@@ -4,21 +4,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
-import com.google.gson.Gson
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.gson.Gson
 import com.example.ecomarket.data.db.PurchaseDatabase
 import com.example.ecomarket.data.datastore.UserPreferencesRepository
 
-// IMPORTS CLAVE: Usamos alias para la capa DATA para evitar conflictos con DOMAIN
-import com.example.ecomarket.data.repository.PurchaseRepository as DataPurchaseRepository // CLASE CONCRETA (data)
-import com.example.ecomarket.data.repository.ShippingRepository as DataShippingRepository // CLASE CONCRETA (data)
+// Repositorios de dominio
+import com.example.ecomarket.domain.repository.PurchaseRepository
+import com.example.ecomarket.data.repository.ShippingRepository as DataShippingRepository
 
-// Importaciones de Interfaces de Repositorio (Dominio)
-import com.example.ecomarket.domain.repository.PurchaseRepository // INTERFAZ (domain)
-import com.example.ecomarket.domain.repository.ShippingRepository // INTERFAZ (domain)
-
-// Importaciones de Vistas y ViewModels
+// ViewModels y Screens
 import com.example.ecomarket.ui.screens.*
 import com.example.ecomarket.ui.viewmodel.*
 
@@ -33,9 +29,7 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
     val gson = Gson()
     // --- FIN DEPENDENCIAS COMUNES ---
 
-
-    val startDestination =
-        if (isLoggedIn) Screen.Main.route else Screen.Login.route
+    val startDestination = if (isLoggedIn) Screen.Main.route else Screen.Login.route
 
     NavHost(
         navController = navController,
@@ -45,7 +39,6 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
         // 🔐 LOGIN
         composable(Screen.Login.route) {
             val repository = UserPreferencesRepository(context)
-
             val loginViewModel: LoginViewModel =
                 viewModel(factory = LoginViewModelFactory(repository = repository))
 
@@ -76,11 +69,8 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
                 viewModel(factory = ProductsViewModelFactory())
             val userPrefsRepository = UserPreferencesRepository(context)
 
-            // DI: Construir la CLASE CONCRETA y ASIGNARLA a la INTERFAZ (PurchaseRepository)
-            val purchaseRepository: PurchaseRepository = DataPurchaseRepository(
-                purchaseDao,
-                gson
-            )
+            // Instanciamos el PurchaseRepository de dominio correctamente
+            val purchaseRepository = PurchaseRepository(purchaseDao, gson)
 
             val checkoutViewModel: CheckoutViewModel = viewModel(
                 factory = CheckoutViewModelFactory(
@@ -93,7 +83,7 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
             CartScreen(
                 mainNavController = navController,
-                viewModel = checkoutViewModel // <-- Nombre de parámetro corregido
+                viewModel = checkoutViewModel
             )
         }
 
@@ -103,11 +93,7 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
                 viewModel(factory = ProductsViewModelFactory())
             val userPrefsRepository = UserPreferencesRepository(context)
 
-            // DI: Construir la CLASE CONCRETA y ASIGNARLA a la INTERFAZ (PurchaseRepository)
-            val purchaseRepository: PurchaseRepository = DataPurchaseRepository(
-                purchaseDao,
-                gson
-            )
+            val purchaseRepository = PurchaseRepository(purchaseDao, gson)
 
             val checkoutViewModel: CheckoutViewModel = viewModel(
                 factory = CheckoutViewModelFactory(
@@ -120,17 +106,15 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
             CheckoutScreen(
                 mainNavController = navController,
-                viewModel = checkoutViewModel // <-- Nombre de parámetro corregido
+                viewModel = checkoutViewModel
             )
         }
 
         // 🚚 SHIPPING
         composable(Screen.Shipping.route) {
-            // Instanciamos la implementación concreta
             val shippingRepositoryImpl = DataShippingRepository(context)
 
             val shippingViewModel: ShippingViewModel = viewModel(
-                // Pasamos la implementación concreta.
                 factory = ShippingViewModelFactory(shippingRepositoryImpl)
             )
 
