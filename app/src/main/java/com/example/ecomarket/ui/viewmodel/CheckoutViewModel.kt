@@ -19,10 +19,8 @@ class CheckoutViewModel(
     private val userPrefsRepository: UserPreferencesRepository
 ) : ViewModel() {
 
-    // Delegamos el estado del carrito
     val uiState: StateFlow<ProductsUiState> = productsViewModel.uiState
 
-    // Métodos para manejar carrito
     fun getCartTotal(): Double = productsViewModel.getCartTotal()
 
     fun updateCartItemQuantity(item: CartItem, quantity: Int) {
@@ -33,7 +31,6 @@ class CheckoutViewModel(
         productsViewModel.clearCart()
     }
 
-    // Variables necesarias para CheckoutScreen
     var isRetiroSelected by mutableStateOf(true)
     var isDespachoSelected by mutableStateOf(false)
     var address by mutableStateOf("")
@@ -44,13 +41,11 @@ class CheckoutViewModel(
     var isProcessing by mutableStateOf(false)
     var isPurchaseComplete by mutableStateOf(false)
 
-    // Cambiar método de envío
     fun setMethod(retiro: Boolean) {
         isRetiroSelected = retiro
         isDespachoSelected = !retiro
     }
 
-    // Finalizar compra
     fun finalizePurchase() {
         viewModelScope.launch {
             isProcessing = true

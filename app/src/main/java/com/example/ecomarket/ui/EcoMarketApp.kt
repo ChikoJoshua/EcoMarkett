@@ -1,5 +1,6 @@
 package com.example.ecomarket.ui
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -7,14 +8,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.gson.Gson
-import com.example.ecomarket.data.db.PurchaseDatabase
 import com.example.ecomarket.data.datastore.UserPreferencesRepository
+import com.example.ecomarket.data.db.PurchaseDatabase
 
-// Repositorios de dominio
-import com.example.ecomarket.domain.repository.PurchaseRepository
+// Repositorios de Data (si los necesitas)
 import com.example.ecomarket.data.repository.ShippingRepository as DataShippingRepository
 
-// ViewModels y Screens
+// Repositorios de Domain
+import com.example.ecomarket.domain.repository.ProductRepository
+import com.example.ecomarket.domain.repository.PurchaseRepository
+
+// Screens y ViewModels
 import com.example.ecomarket.ui.screens.*
 import com.example.ecomarket.ui.viewmodel.*
 
@@ -27,9 +31,13 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
     // --- DEPENDENCIAS COMUNES ---
     val purchaseDao = PurchaseDatabase.getInstance(context).purchaseDao()
     val gson = Gson()
+    val productRepository = ProductRepository()
+    val purchaseRepository = PurchaseRepository(purchaseDao, gson)
+    val userPrefsRepository = UserPreferencesRepository(context)
     // --- FIN DEPENDENCIAS COMUNES ---
 
-    val startDestination = if (isLoggedIn) Screen.Main.route else Screen.Login.route
+    val startDestination =
+        if (isLoggedIn) Screen.Main.route else Screen.Login.route
 
     NavHost(
         navController = navController,
@@ -38,9 +46,9 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
         // 🔐 LOGIN
         composable(Screen.Login.route) {
-            val repository = UserPreferencesRepository(context)
-            val loginViewModel: LoginViewModel =
-                viewModel(factory = LoginViewModelFactory(repository = repository))
+            val loginViewModel: LoginViewModel = viewModel(
+                factory = LoginViewModelFactory(repository = userPrefsRepository)
+            )
 
             LoginScreen(
                 viewModel = loginViewModel,
@@ -54,8 +62,9 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
         // 🏠 MAIN
         composable(Screen.Main.route) {
-            val productsViewModel: ProductsViewModel =
-                viewModel(factory = ProductsViewModelFactory())
+            val productsViewModel: ProductsViewModel = viewModel(
+                factory = ProductsViewModelFactory(productRepository)
+            )
 
             MainScreen(
                 mainNavController = navController,
@@ -65,19 +74,16 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
         // 🛒 CARRITO
         composable(Screen.Cart.route) {
-            val productsViewModel: ProductsViewModel =
-                viewModel(factory = ProductsViewModelFactory())
-            val userPrefsRepository = UserPreferencesRepository(context)
-
-            // Instanciamos el PurchaseRepository de dominio correctamente
-            val purchaseRepository = PurchaseRepository(purchaseDao, gson)
+            val productsViewModel: ProductsViewModel = viewModel(
+                factory = ProductsViewModelFactory(productRepository)
+            )
 
             val checkoutViewModel: CheckoutViewModel = viewModel(
                 factory = CheckoutViewModelFactory(
                     context,
                     productsViewModel,
-                    userPrefsRepository = userPrefsRepository,
-                    purchaseRepository = purchaseRepository
+                    userPrefsRepository,
+                    purchaseRepository
                 )
             )
 
@@ -89,18 +95,16 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
         // 💳 CHECKOUT
         composable(Screen.Checkout.route) {
-            val productsViewModel: ProductsViewModel =
-                viewModel(factory = ProductsViewModelFactory())
-            val userPrefsRepository = UserPreferencesRepository(context)
-
-            val purchaseRepository = PurchaseRepository(purchaseDao, gson)
+            val productsViewModel: ProductsViewModel = viewModel(
+                factory = ProductsViewModelFactory(productRepository)
+            )
 
             val checkoutViewModel: CheckoutViewModel = viewModel(
                 factory = CheckoutViewModelFactory(
                     context,
                     productsViewModel,
-                    userPrefsRepository = userPrefsRepository,
-                    purchaseRepository = purchaseRepository
+                    userPrefsRepository,
+                    purchaseRepository
                 )
             )
 

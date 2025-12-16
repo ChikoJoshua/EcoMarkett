@@ -38,7 +38,6 @@ class ProductsViewModel(
         }
     }
 
-
     fun addToCart(product: Product) {
         val currentCart = _uiState.value.cartItems.toMutableList()
         val existingItem = currentCart.find { it.product.id == product.id }
@@ -58,11 +57,9 @@ class ProductsViewModel(
         }
     }
 
-
     fun getCartTotal(): Double {
         return _uiState.value.cartItems.sumOf { it.product.price * it.quantity }
     }
-
 
     fun updateCartItemQuantity(cartItem: CartItem, newQuantity: Int) {
         val currentCart = _uiState.value.cartItems.toMutableList()
@@ -83,7 +80,6 @@ class ProductsViewModel(
             )
         }
     }
-
 
     fun clearCart() {
         _uiState.update {
