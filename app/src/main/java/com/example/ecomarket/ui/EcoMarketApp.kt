@@ -10,15 +10,9 @@ import androidx.navigation.compose.rememberNavController
 import com.google.gson.Gson
 import com.example.ecomarket.data.datastore.UserPreferencesRepository
 import com.example.ecomarket.data.db.PurchaseDatabase
-
-// Repositorios de Data
 import com.example.ecomarket.data.repository.ShippingRepository as DataShippingRepository
-
-// Repositorios de Domain
 import com.example.ecomarket.domain.repository.ProductRepository
 import com.example.ecomarket.domain.repository.PurchaseRepository
-
-// Screens y ViewModels
 import com.example.ecomarket.ui.screens.*
 import com.example.ecomarket.ui.viewmodel.*
 
@@ -35,11 +29,6 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
     val purchaseRepository = PurchaseRepository(purchaseDao, gson)
     val userPrefsRepository = UserPreferencesRepository(context)
     // --- FIN DEPENDENCIAS COMUNES ---
-
-    // 🔹 Crear una sola instancia de ProductsViewModel
-    val productsViewModel: ProductsViewModel = viewModel(
-        factory = ProductsViewModelFactory(productRepository)
-    )
 
     val startDestination =
         if (isLoggedIn) Screen.Main.route else Screen.Login.route
@@ -67,6 +56,10 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
         // 🏠 MAIN
         composable(Screen.Main.route) {
+            val productsViewModel: ProductsViewModel = viewModel(
+                factory = ProductsViewModelFactory(productRepository)
+            )
+
             MainScreen(
                 mainNavController = navController,
                 productsViewModel = productsViewModel
@@ -75,12 +68,16 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
         // 🛒 CARRITO
         composable(Screen.Cart.route) {
+            val productsViewModel: ProductsViewModel = viewModel(
+                factory = ProductsViewModelFactory(productRepository)
+            )
+
             val checkoutViewModel: CheckoutViewModel = viewModel(
                 factory = CheckoutViewModelFactory(
-                    context,
-                    productsViewModel, // PASAMOS la misma instancia
-                    userPrefsRepository,
-                    purchaseRepository
+                    context = context,
+                    productsViewModel = productsViewModel,
+                    userPrefsRepository = userPrefsRepository,
+                    purchaseRepository = purchaseRepository
                 )
             )
 
@@ -92,12 +89,16 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
         // 💳 CHECKOUT
         composable(Screen.Checkout.route) {
+            val productsViewModel: ProductsViewModel = viewModel(
+                factory = ProductsViewModelFactory(productRepository)
+            )
+
             val checkoutViewModel: CheckoutViewModel = viewModel(
                 factory = CheckoutViewModelFactory(
-                    context,
-                    productsViewModel, // PASAMOS la misma instancia
-                    userPrefsRepository,
-                    purchaseRepository
+                    context = context,
+                    productsViewModel = productsViewModel,
+                    userPrefsRepository = userPrefsRepository,
+                    purchaseRepository = purchaseRepository
                 )
             )
 
@@ -122,7 +123,10 @@ fun EcoMarketApp(isLoggedIn: Boolean) {
 
         // 📜 HISTORY
         composable(Screen.History.route) {
-            HistoryScreen()
+            HistoryScreen(
+                purchaseRepository = purchaseRepository,
+                userPrefsRepository = userPrefsRepository
+            )
         }
     }
 }

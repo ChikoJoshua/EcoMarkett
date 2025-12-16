@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ecomarket.data.datastore.UserPreferencesRepository
 import com.example.ecomarket.data.db.PurchaseEntity
+import com.example.ecomarket.domain.repository.PurchaseRepository
 import com.example.ecomarket.ui.viewmodel.HistoryViewModel
 import com.example.ecomarket.ui.viewmodel.HistoryViewModelFactory
 import java.text.SimpleDateFormat
@@ -20,12 +22,19 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(
+    purchaseRepository: PurchaseRepository,
+    userPrefsRepository: UserPreferencesRepository
+) {
 
     val context = LocalContext.current
 
     val viewModel: HistoryViewModel = viewModel(
-        factory = HistoryViewModelFactory(context)
+        factory = HistoryViewModelFactory(
+            context,
+            purchaseRepository,
+            userPrefsRepository
+        )
     )
 
     val uiState by viewModel.uiState.collectAsState()
@@ -35,7 +44,6 @@ fun HistoryScreen() {
     ) { paddingValues ->
 
         if (uiState.isLoading) {
-
             Box(
                 Modifier
                     .fillMaxSize()
@@ -46,11 +54,9 @@ fun HistoryScreen() {
             }
 
         } else if (uiState.purchases.isEmpty()) {
-
             EmptyHistoryMessage(Modifier.padding(paddingValues))
 
         } else {
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -69,7 +75,6 @@ fun HistoryScreen() {
 
 @Composable
 fun PurchaseCard(purchase: PurchaseEntity) {
-
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     val totalText = String.format(Locale.US, "$%.2f", purchase.total)
 
@@ -122,8 +127,7 @@ fun EmptyHistoryMessage(modifier: Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            Icons.Filled.List
-            ,
+            Icons.Filled.List,
             contentDescription = "Historial Vacío",
             modifier = Modifier.size(80.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
