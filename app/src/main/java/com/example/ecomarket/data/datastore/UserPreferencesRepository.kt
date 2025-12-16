@@ -36,7 +36,6 @@ class UserPreferencesRepository(private val context: Context) {
         context.dataStore.edit { it.clear() }
     }
 
-    // ✅ Nuevo método para CheckoutViewModel
     suspend fun getUserEmail(): String {
         return context.dataStore.data.map { it[PreferencesKeys.USER_EMAIL] ?: "test@example.com" }.first()
     }

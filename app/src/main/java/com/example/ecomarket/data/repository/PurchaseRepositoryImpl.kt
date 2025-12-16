@@ -11,7 +11,7 @@ class PurchaseRepositoryImpl {
         method: String,
         address: String
     ) {
-        // Aquí normalmente guardas en DB o SharedPreferences
+
         println("Compra registrada para $userEmail, total: $total, método: $method, dirección: $address")
     }
 }

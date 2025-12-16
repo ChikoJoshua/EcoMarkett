@@ -10,11 +10,10 @@ import com.example.ecomarket.ui.viewmodel.LoginViewModel
 import com.example.ecomarket.ui.viewmodel.ProductsViewModel // <-- NECESITAS EL IMPORT
 import com.example.ecomarket.ui.viewmodel.ProductsViewModelFactory // <-- NECESITAS EL IMPORT
 
-// CORRECCIÓN 1: AppNavigation debe recibir productsViewModel
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    productsViewModel: ProductsViewModel // <-- Añadido el parámetro faltante
+    productsViewModel: ProductsViewModel
 ) {
 
     NavHost(
@@ -35,12 +34,10 @@ fun AppNavigation(
             )
         }
 
-        // CORRECCIÓN 2: Pasar productsViewModel a MainScreen
         composable(Screen.Main.route) {
-            // L33: Ahora pasamos el argumento que faltaba
             MainScreen(
                 mainNavController = navController,
-                productsViewModel = productsViewModel // <-- Añadido el argumento
+                productsViewModel = productsViewModel
             )
         }
     }

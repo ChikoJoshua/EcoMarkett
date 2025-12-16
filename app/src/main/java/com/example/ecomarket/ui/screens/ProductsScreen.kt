@@ -23,7 +23,7 @@ import java.util.Locale
 @Composable
 fun ProductsScreen(
     mainNavController: NavHostController,
-    viewModel: ProductsViewModel // <-- Firma que MainScreen debe igualar
+    viewModel: ProductsViewModel
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
@@ -92,7 +92,6 @@ fun ProductsScreen(
     }
 }
 
-// ---------- Product Card ----------
 
 @Composable
 fun ProductCard(

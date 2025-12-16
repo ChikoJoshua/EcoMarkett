@@ -9,9 +9,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.compose.material.icons.filled.ArrowBack // <-- Import del icono
+import androidx.compose.material.icons.filled.ArrowBack
 import com.example.ecomarket.domain.repository.ShippingRepository
-import com.example.ecomarket.data.repository.ShippingRepository as DataShippingRepository // <-- Usamos el alias de data
+import com.example.ecomarket.data.repository.ShippingRepository as DataShippingRepository
 import com.example.ecomarket.ui.Screen
 import com.example.ecomarket.ui.viewmodel.ShippingViewModel
 import com.example.ecomarket.ui.viewmodel.ShippingViewModelFactory
@@ -23,7 +23,6 @@ fun ShippingScreen(
 ) {
     val context = LocalContext.current
 
-    // Inicializamos el ViewModel con su factory, usando la clase CONCRETA de Data
     val shippingRepositoryImpl = DataShippingRepository(context)
 
     val shippingViewModel: ShippingViewModel = viewModel(
@@ -47,7 +46,7 @@ fun ShippingScreen(
             )
         }
     ) { padding ->
-        // ... (Resto del UI)
+
         Column(
             modifier = Modifier
                 .padding(padding)
