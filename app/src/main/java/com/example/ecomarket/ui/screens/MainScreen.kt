@@ -44,7 +44,6 @@ private val bottomItems = listOf(
     BottomScreen.Account
 )
 
-/* ---------- MainScreen ---------- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
@@ -103,7 +102,6 @@ fun MainScreen(
     }
 }
 
-/* ---------- BottomNavGraph ---------- */
 @Composable
 fun BottomNavGraph(
     navController: NavHostController,
@@ -118,7 +116,7 @@ fun BottomNavGraph(
     ) {
 
         composable(BottomScreen.Products.route) {
-            // CORRECCIÓN: Se usa 'viewModel' en lugar de 'productsViewModel'
+
             ProductsScreen(
                 mainNavController = mainNavController,
                 viewModel = productsViewModel

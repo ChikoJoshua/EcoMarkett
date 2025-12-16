@@ -73,7 +73,6 @@ fun CartScreen(
     }
 }
 
-// ---------- Cart Item Row ----------
 @Composable
 fun CartItemRow(
     item: CartItem,
@@ -126,7 +125,6 @@ fun CartItemRow(
     }
 }
 
-// ---------- Bottom Bar ----------
 @Composable
 fun CartBottomBar(
     total: Double,
@@ -159,7 +157,6 @@ fun CartBottomBar(
     }
 }
 
-// ---------- Empty Cart ----------
 @Composable
 fun EmptyCartMessage(modifier: Modifier) {
     Column(
