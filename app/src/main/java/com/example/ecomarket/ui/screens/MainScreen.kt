@@ -118,7 +118,7 @@ fun BottomNavGraph(
     ) {
 
         composable(BottomScreen.Products.route) {
-            // CORRECCIÓN: Se usa 'viewModel' en lugar de 'productsViewModel'
+
             ProductsScreen(
                 mainNavController = mainNavController,
                 viewModel = productsViewModel
